@@ -48,6 +48,7 @@ import select
 from subprocess import Popen, PIPE, STDOUT
 from time import sleep
 
+from mininet.compat import Compat
 from mininet.log import info, error, debug
 from mininet.util import quietRun, makeIntfPair, moveIntf, isShellBuiltin
 from mininet.moduledeps import moduleDeps, pathCheck, OVS_KMOD, OF_KMOD, TUN
@@ -488,12 +489,16 @@ class UserSwitch( Switch ):
         intfs = sorted( self.intfs.values() )
         if self.inNamespace:
             intfs = intfs[ :-1 ]
+        if Compat.get_version() == '1.1.0':
+            arg_fail = ''
+        else:
+            arg_fail = ' --fail=closed '
         self.cmd( 'ofdatapath -i ' + ','.join( intfs ) +
             ' punix:/tmp/' + self.name + mac_str + ' --no-slicing ' +
             ' 1> ' + ofdlog + ' 2> ' + ofdlog + ' &' )
         self.cmd( 'ofprotocol unix:/tmp/' + self.name +
             ' tcp:%s:%d' % ( controller.IP(), controller.port ) +
-            ' --fail=closed ' + self.opts +
+            arg_fail + self.opts +
             ' 1> ' + ofplog + ' 2>' + ofplog + ' &' )
 
     def stop( self ):

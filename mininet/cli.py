@@ -31,6 +31,7 @@ from os import isatty
 from select import poll, POLLIN
 import sys
 
+from mininet.compat import Compat
 from mininet.log import info, output, error
 from mininet.term import makeTerms
 from mininet.util import quietRun, isShellBuiltin
@@ -283,8 +284,11 @@ class CLI( Cmd ):
             return
         for sw in self.mn.switches:
             output( '*** ' + sw.name + ' ' + ('-' * 72) + '\n' )
-            output( sw.cmd( 'dpctl ' + ' '.join(args) +
-                            ' tcp:127.0.0.1:%i' % sw.listenPort ) )
+            addr = 'tcp:127.0.0.1:%i' % sw.listenPort
+            if Compat.get_version() == '1.1.0':
+                output( sw.cmd( 'dpctl ' + addr + ' ' + ' '.join(args) ) )
+            else:
+                output( sw.cmd( 'dpctl ' + ' '.join(args) + ' ' + addr ) )
 
     def default( self, line ):
         """Called on an input line when the command prefix is not recognized.

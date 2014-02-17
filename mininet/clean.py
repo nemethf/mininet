@@ -69,4 +69,9 @@ def cleanup():
         if link:
             sh( "ip link del " + link )
 
+    info( "*** Removing all network namespaces of the pattern mn-*\n" )
+    netns = sh( "ip netns list | egrep -o '^mn-\w+'" ).split( '\n' )
+    for n in netns:
+        sh( "ip netns delete " + n )
+
     info( "*** Cleanup complete.\n" )
